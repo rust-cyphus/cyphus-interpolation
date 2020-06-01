@@ -1,4 +1,21 @@
 pub(super) mod curfit;
+pub(super) mod fpader;
+pub(super) mod fpback;
+pub(super) mod fpbspl;
+pub(super) mod fpchec;
+pub(super) mod fpcurf;
+pub(super) mod fpcuro;
+pub(super) mod fpdisc;
+pub(super) mod fpgivs;
+pub(super) mod fpintb;
+pub(super) mod fpknot;
+pub(super) mod fprati;
+pub(super) mod fprota;
+pub(super) mod spalde;
+pub(super) mod splder;
+pub(super) mod splev;
+pub(super) mod splint;
+pub(super) mod sproot;
 use ndarray::prelude::*;
 
 pub struct UnivariateSpline {
