@@ -1,9 +1,9 @@
-pub(super) mod curfit;
+//pub(super) mod curfit;
 pub(super) mod fpader;
 pub(super) mod fpback;
 pub(super) mod fpbspl;
 pub(super) mod fpchec;
-pub(super) mod fpcurf;
+//pub(super) mod fpcurf;
 pub(super) mod fpcuro;
 pub(super) mod fpdisc;
 pub(super) mod fpgivs;
