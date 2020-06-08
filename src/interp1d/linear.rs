@@ -1,6 +1,6 @@
 use super::acc::InterpAccel;
 use super::traits::Interp;
-use super::util::accel_find;
+use super::util::{accel_find, bsearch};
 use super::LinearInterp;
 
 impl LinearInterp {
@@ -10,11 +10,23 @@ impl LinearInterp {
         LinearInterp {
             x: x.clone(),
             y: y.clone(),
-            acc: InterpAccel::new(),
+            acc: None,
         }
     }
-    fn accel_find(&mut self, x: f64) -> usize {
-        accel_find(&self.x, x, &mut self.acc)
+    /// Create a new linear interpolator for a given set of `x` and `y` data.
+    #[allow(dead_code)]
+    pub fn with_acc(x: &Vec<f64>, y: &Vec<f64>) -> LinearInterp {
+        LinearInterp {
+            x: x.clone(),
+            y: y.clone(),
+            acc: Some(InterpAccel::new()),
+        }
+    }
+    fn find(&mut self, x: f64) -> usize {
+        match self.acc {
+            Some(ref mut acc) => accel_find(&self.x, x, acc),
+            None => bsearch(&self.x, x, 0, self.x.len() - 1),
+        }
     }
 }
 
@@ -23,7 +35,7 @@ impl Interp for LinearInterp {
         if x < self.x[0] || x > self.x[self.x.len() - 1] {
             return f64::NAN;
         }
-        let idx = self.accel_find(x);
+        let idx = self.find(x);
 
         let x_l = self.x[idx];
         let x_h = self.x[idx + 1];
@@ -41,7 +53,7 @@ impl Interp for LinearInterp {
         if x < self.x[0] || x > self.x[self.x.len() - 1] {
             return f64::NAN;
         }
-        let idx = self.accel_find(x);
+        let idx = self.find(x);
 
         let x_l = self.x[idx];
         let x_h = self.x[idx + 1];
@@ -66,8 +78,8 @@ impl Interp for LinearInterp {
         if a > b || a < self.x[0] || b > self.x[self.x.len() - 1] {
             return f64::NAN;
         }
-        let idx_a = self.accel_find(a);
-        let idx_b = self.accel_find(b);
+        let idx_a = self.find(a);
+        let idx_b = self.find(b);
 
         let mut res = 0.0;
         for i in idx_a..(idx_b + 1) {
