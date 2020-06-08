@@ -1,6 +1,6 @@
 [package]
 name = "cyphus-interpolation"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Logan A Morrison <loanmorr@ucsc.com>"]
 edition = "2018"
 
