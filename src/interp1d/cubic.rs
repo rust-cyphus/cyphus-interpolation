@@ -1,13 +1,7 @@
 use super::acc::InterpAccel;
 use super::traits::Interp;
 use super::util::{accel_find, integ_eval, solve_tridiag};
-
-pub struct CubicSpline {
-    x: Vec<f64>,
-    y: Vec<f64>,
-    c: Vec<f64>,
-    acc: InterpAccel,
-}
+use super::CubicSpline;
 
 impl CubicSpline {
     #[allow(dead_code)]

@@ -1,16 +1,7 @@
 use super::acc::InterpAccel;
 use super::traits::Interp;
 use super::util::accel_find;
-
-/// Linear interpolator
-pub struct LinearInterp {
-    /// x-data
-    x: Vec<f64>,
-    /// y-data
-    y: Vec<f64>,
-    /// Accelerator
-    acc: InterpAccel,
-}
+use super::LinearInterp;
 
 impl LinearInterp {
     /// Create a new linear interpolator for a given set of `x` and `y` data.
