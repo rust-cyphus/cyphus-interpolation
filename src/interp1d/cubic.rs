@@ -1,5 +1,5 @@
 use super::acc::InterpAccel;
-use super::traits::Interp;
+use super::traits::Interp1d;
 use super::util::{accel_find, bsearch, integ_eval, solve_tridiag};
 use super::CubicSpline;
 
@@ -37,43 +37,7 @@ impl CubicSpline {
             x: x.clone(),
             y: y.clone(),
             c,
-            acc: None,
-        }
-    }
-    #[allow(dead_code)]
-    pub fn with_acc(x: &Vec<f64>, y: &Vec<f64>) -> CubicSpline {
-        let npts = x.len();
-        let max_idx = npts - 1;
-        let sys_size = max_idx - 1;
-
-        let mut c = vec![0.0; npts];
-        let mut gg = vec![0.0; npts];
-        let mut diag = vec![0.0; npts];
-        let mut offdiag = vec![0.0; npts];
-
-        for i in 0..sys_size {
-            let h = x[i + 1] - x[i];
-            let hp1 = x[i + 2] - x[i + 1];
-            let ydiff = y[i + 1] - y[i];
-            let ydiffpt = y[i + 2] - y[i + 1];
-            let g = if h != 0.0 { 1.0 / h } else { 0.0 };
-            let gp1 = if hp1 != 0.0 { 1.0 / hp1 } else { 0.0 };
-
-            offdiag[i] = hp1;
-            diag[i] = 2.0 * (hp1 + h);
-            gg[i] = 3.0 * (ydiffpt * gp1 - ydiff * g);
-        }
-
-        if sys_size == 1 {
-            c[1] = gg[0] / diag[0];
-        } else {
-            solve_tridiag(&diag, &offdiag, &gg, &mut c[1..], sys_size);
-        }
-        CubicSpline {
-            x: x.clone(),
-            y: y.clone(),
-            c,
-            acc: Some(InterpAccel::new()),
+            acc: InterpAccel::new(),
         }
     }
     #[allow(dead_code)]
@@ -86,17 +50,18 @@ impl CubicSpline {
         (b, c, d)
     }
     #[allow(dead_code)]
-    fn find(&mut self, x: f64) -> usize {
-        match self.acc {
-            Some(ref mut acc) => accel_find(&self.x, x, acc),
-            None => bsearch(&self.x, x, 0, self.x.len() - 1),
-        }
+    fn bsearch(&self, x: f64) -> usize {
+        bsearch(&self.x, x, 0, self.x.len() - 1)
+    }
+    #[allow(dead_code)]
+    fn accel_find(&mut self, x: f64) -> usize {
+        accel_find(&self.x, x, &mut self.acc)
     }
 }
 
-impl Interp for CubicSpline {
-    fn eval(&mut self, x: f64) -> f64 {
-        let idx = self.find(x);
+impl Interp1d for CubicSpline {
+    fn eval(&self, x: f64) -> f64 {
+        let idx = self.bsearch(x);
 
         let xh = self.x[idx + 1];
         let xl = self.x[idx];
@@ -113,8 +78,26 @@ impl Interp for CubicSpline {
             0.0
         }
     }
-    fn deriv(&mut self, x: f64) -> f64 {
-        let idx = self.find(x);
+    fn eval_acc(&mut self, x: f64) -> f64 {
+        let idx = self.accel_find(x);
+
+        let xh = self.x[idx + 1];
+        let xl = self.x[idx];
+        let dx = xh - xl;
+
+        if dx > 0.0 {
+            let yh = self.y[idx + 1];
+            let yl = self.y[idx];
+            let dy = yh - yl;
+            let delx = x - xl;
+            let (b, c, d) = self.coeff_calc(dy, dx, idx);
+            d.mul_add(delx, c).mul_add(delx, b).mul_add(delx, yl)
+        } else {
+            0.0
+        }
+    }
+    fn deriv(&self, x: f64) -> f64 {
+        let idx = self.bsearch(x);
 
         let xh = self.x[idx + 1];
         let xl = self.x[idx];
@@ -131,8 +114,26 @@ impl Interp for CubicSpline {
             0.0
         }
     }
-    fn second_deriv(&mut self, x: f64) -> f64 {
-        let idx = self.find(x);
+    fn deriv_acc(&mut self, x: f64) -> f64 {
+        let idx = self.accel_find(x);
+
+        let xh = self.x[idx + 1];
+        let xl = self.x[idx];
+        let dx = xh - xl;
+
+        if dx > 0.0 {
+            let yh = self.y[idx + 1];
+            let yl = self.y[idx];
+            let dy = yh - yl;
+            let delx = x - xl;
+            let (b, c, d) = self.coeff_calc(dy, dx, idx);
+            (3.0 * d).mul_add(delx, 2.0 * c).mul_add(delx, b)
+        } else {
+            0.0
+        }
+    }
+    fn second_deriv(&self, x: f64) -> f64 {
+        let idx = self.bsearch(x);
 
         let xh = self.x[idx + 1];
         let xl = self.x[idx];
@@ -149,9 +150,58 @@ impl Interp for CubicSpline {
             0.0
         }
     }
-    fn integrate(&mut self, a: f64, b: f64) -> f64 {
-        let idx_a = self.find(a);
-        let idx_b = self.find(b);
+    fn second_deriv_acc(&mut self, x: f64) -> f64 {
+        let idx = self.accel_find(x);
+
+        let xh = self.x[idx + 1];
+        let xl = self.x[idx];
+        let dx = xh - xl;
+
+        if dx > 0.0 {
+            let yl = self.y[idx];
+            let yh = self.y[idx + 1];
+            let dy = yh - yl;
+            let delx = x - xl;
+            let (_, c, d) = self.coeff_calc(dy, dx, idx);
+            delx.mul_add(6.0 * d, 2.0 * c)
+        } else {
+            0.0
+        }
+    }
+    fn integrate(&self, a: f64, b: f64) -> f64 {
+        let idx_a = self.bsearch(a);
+        let idx_b = self.bsearch(b);
+
+        let mut result = 0.0;
+        for i in idx_a..(idx_b + 1) {
+            let xh = self.x[i + 1];
+            let xl = self.x[i];
+            let yh = self.y[i + 1];
+            let yl = self.y[i];
+            let dx = xh - xl;
+            let dy = yh - yl;
+            if dx != 0.0 {
+                let (bi, ci, di) = self.coeff_calc(dy, dx, i);
+                result += if i == idx_a || i == idx_b {
+                    let x1 = if i == idx_a { a } else { xl };
+                    let x2 = if i == idx_b { b } else { xh };
+                    integ_eval(yl, bi, ci, di, xl, x1, x2)
+                } else {
+                    (0.25 * di)
+                        .mul_add(dx, ci / 3.0)
+                        .mul_add(dx, 0.5 * bi)
+                        .mul_add(dx, yl)
+                        * dx
+                };
+            } else {
+                return 0.0;
+            }
+        }
+        result
+    }
+    fn integrate_acc(&mut self, a: f64, b: f64) -> f64 {
+        let idx_a = self.accel_find(a);
+        let idx_b = self.accel_find(b);
 
         let mut result = 0.0;
         for i in idx_a..(idx_b + 1) {
@@ -360,7 +410,7 @@ mod test {
             0.774989397332469,
         ];
 
-        let mut spline = CubicSpline::with_acc(&data_x, &data_y);
+        let mut spline = CubicSpline::new(&data_x, &data_y);
 
         for (i, x) in test_x.iter().enumerate() {
             let y = spline.eval(*x);
