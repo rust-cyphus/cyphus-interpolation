@@ -1,12 +1,13 @@
-pub(crate) mod acc;
+pub mod acc;
 pub mod cubic;
 pub mod linear;
 pub(crate) mod traits;
 pub(crate) mod util;
 
+pub use acc::InterpAccel;
 pub use cubic::*;
 pub use linear::*;
-pub use traits::Interp;
+pub use traits::Interp1d;
 
 /// Cubic spline interpolator
 pub struct CubicSpline {
@@ -17,7 +18,7 @@ pub struct CubicSpline {
     /// Coefficients
     c: Vec<f64>,
     /// Accelerator
-    acc: Option<acc::InterpAccel>,
+    acc: InterpAccel,
 }
 
 /// Linear interpolator
@@ -27,5 +28,5 @@ pub struct LinearInterp {
     /// y-data
     y: Vec<f64>,
     /// Accelerator
-    acc: Option<acc::InterpAccel>,
+    acc: InterpAccel,
 }
