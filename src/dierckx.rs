@@ -289,6 +289,13 @@ impl UnivariateSpline {
         );
         y
     }
+    #[allow(dead_code)]
+    pub fn roots(&self) -> Array1<f64> {
+        let mut ier = 0;
+        let zero = sproot::sproot(self.t.view(), self.n, self.c.view(), &mut ier);
+        dbg!(ier);
+        return zero;
+    }
 }
 
 #[cfg(test)]
@@ -328,7 +335,7 @@ mod test {
 
         let spline = UnivariateSplineBuilder::default(&xs, &ys).build().unwrap();
         let int = spline.integrate(1.0, 2.0);
-        println!("{}", int);
+        dbg!("{}", int);
         assert!((int - 0.956449142415282).abs() < 1e-5);
     }
     #[test]
@@ -346,13 +353,6 @@ mod test {
 
         let spline = UnivariateSplineBuilder::default(&xs, &ys).build().unwrap();
 
-        println!("coeffs = {}", spline.c);
-        println!("");
-        println!("");
-        println!("knots = {}", spline.t);
-        println!("");
-        println!("");
-
         let dys = spline.derivative_array(1, &xs);
         for (x, dy) in xs.iter().zip(dys.iter()) {
             let dy0 = (*x).cos();
@@ -360,5 +360,18 @@ mod test {
             //assert!((*dy - (*x).cos()).abs() < 1e-10);
         }
         assert!(false);
+    }
+    #[test]
+    fn test_roots() {
+        let pi = std::f64::consts::PI;
+        let xs = Array::linspace(-3.0 * pi / 2.0, 3.0 * pi / 2.0, 100);
+        let ys = xs.mapv(f64::sin);
+
+        let spline = UnivariateSplineBuilder::default(&xs, &ys).build().unwrap();
+        let zeros = spline.roots();
+
+        assert!((zeros[0] + pi).abs() < 1e-5);
+        assert!((zeros[1]).abs() < 1e-5);
+        assert!((zeros[2] - pi).abs() < 1e-5);
     }
 }
