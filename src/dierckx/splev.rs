@@ -3,9 +3,9 @@ use ndarray::prelude::*;
 #[allow(dead_code)]
 pub(super) fn splev(
     t: ArrayView1<f64>,
-    n: &mut usize,
+    n: usize,
     c: ArrayView1<f64>,
-    k: &mut usize,
+    k: usize,
     x: ArrayView1<f64>,
     mut y: ArrayViewMut1<f64>,
     m: usize,
@@ -21,10 +21,10 @@ pub(super) fn splev(
     }
     *ier = 0;
     // fetch tb and te, the boundaries of the approximation interval.
-    let k1 = *k + 1;
+    let k1 = k + 1;
     let k2 = k1 + 1;
 
-    let nk1 = *n - k1;
+    let nk1 = n - k1;
     let tb = t[k1 - 1];
     let te = t[nk1];
     let mut l = k1;
@@ -67,7 +67,7 @@ pub(super) fn splev(
         }
 
         // evaluate the non-zero b-splines at arg.
-        super::fpbspl::fpbspl(t, *k, arg, l, h.view_mut());
+        super::fpbspl::fpbspl(t, k, arg, l, h.view_mut());
         //  find the value of s(x) at x=arg.
         let mut sp = 0.0;
         let mut ll = l - k1;

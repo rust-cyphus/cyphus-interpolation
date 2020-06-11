@@ -22,8 +22,8 @@ pub(super) fn fpchec(
     t: ArrayViewMut1<f64>,
     n: usize,
     k: usize,
-) -> usize {
-    let mut ier = 10;
+) -> i32 {
+    let mut ier: i32 = 10;
     let k1 = k + 1;
     let k2 = k1 + 1;
     let nk1 = n - k1;
