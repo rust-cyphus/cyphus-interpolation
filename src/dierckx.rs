@@ -26,6 +26,7 @@ pub enum UnivariateSplineBuildErr {
     InvalidDataErr,
 }
 
+#[derive(Debug, Clone)]
 pub struct UnivariateSpline {
     // Degree of the smoothing spline. Must be <= 5. Default is `k=3`, a
     // cubic spline.
@@ -90,27 +91,27 @@ impl UnivariateSplineBuilder {
         }
     }
     #[allow(dead_code)]
-    pub fn weights(&mut self, w: Array1<f64>) -> &mut UnivariateSplineBuilder {
+    pub fn weights(mut self, w: Array1<f64>) -> UnivariateSplineBuilder {
         self.w = Some(w.clone());
         self
     }
     #[allow(dead_code)]
-    pub fn boundary(&mut self, bbox: (f64, f64)) -> &mut UnivariateSplineBuilder {
+    pub fn boundary(mut self, bbox: (f64, f64)) -> UnivariateSplineBuilder {
         self.bbox = Some(bbox.clone());
         self
     }
     #[allow(dead_code)]
-    pub fn degree(&mut self, k: usize) -> &mut UnivariateSplineBuilder {
+    pub fn degree(mut self, k: usize) -> UnivariateSplineBuilder {
         self.k = Some(k);
         self
     }
     #[allow(dead_code)]
-    pub fn smoothing_factor(&mut self, s: f64) -> &mut UnivariateSplineBuilder {
+    pub fn smoothing_factor(mut self, s: f64) -> UnivariateSplineBuilder {
         self.s = Some(s);
         self
     }
     #[allow(dead_code)]
-    pub fn extrapolation(&mut self, ext: usize) -> &mut UnivariateSplineBuilder {
+    pub fn extrapolation(mut self, ext: usize) -> UnivariateSplineBuilder {
         self.ext = Some(ext);
         self
     }
