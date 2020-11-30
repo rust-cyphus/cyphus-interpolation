@@ -13,7 +13,6 @@ use ndarray::prelude::*;
 ///            defined on the set of knots ,i.e. nk1 = n-k-1.
 /// @param x lower bound
 /// @param y upper bound
-#[allow(dead_code)]
 pub(super) fn fpintb(
     t: ArrayView1<f64>,
     n: usize,
@@ -119,7 +118,7 @@ pub(super) fn fpintb(
     let ib = lk - 1;
     for i in 1..=k1 {
         bint[lk - 1] += aint[i - 1];
-        lk = lk + 1;
+        lk += 1;
     }
     if ib >= ia {
         for i in ia..=ib {

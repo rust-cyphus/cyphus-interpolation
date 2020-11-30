@@ -2,7 +2,6 @@ use ndarray::prelude::*;
 
 /// Calculate the solution of the system of equations `a`*`c` = `z` where `a` is
 /// an `n`x`n` upper triangular matrix with bandwidth `k`.
-#[allow(dead_code)]
 pub(super) fn fpback(
     a: ArrayView2<f64>,
     z: ArrayView1<f64>,

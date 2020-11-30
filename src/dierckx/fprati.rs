@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 pub(super) fn fprati(
     p1: &mut f64,
     f1: &mut f64,
@@ -26,5 +25,5 @@ pub(super) fn fprati(
     }
     *p3 = p2;
     *f3 = f2;
-    return p;
+    p
 }

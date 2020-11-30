@@ -3,7 +3,6 @@ use ndarray::prelude::*;
 /// Core routine of "curfit". Computes the knots 't' and spline coefficients 'c'
 /// given x + y data, weights w, a degree k for the interpolating polynomials
 /// and a smoothing factor s.
-#[allow(dead_code)]
 pub(super) fn fpcurf(
     iopt: i32,
     x: ArrayView1<f64>,
@@ -129,14 +128,14 @@ pub(super) fn fpcurf(
                 if k3 * 2 == *k {
                     for _l in 1..(mk1 + 1) {
                         t[i - 1] = (x[j - 1] + x[j - 1 - 1]) * 0.5;
-                        i = i + 1;
-                        j = j + 1;
+                        i += 1;
+                        j += 1;
                     }
                 } else {
                     for _l in 1..(mk1 + 1) {
                         t[i - 1] = x[j - 1];
-                        i = i + 1;
-                        j = j + 1;
+                        i += 1;
+                        j += 1;
                     }
                 }
             }
@@ -187,7 +186,7 @@ pub(super) fn fpcurf(
                 super::fpbspl::fpbspl(t.view(), *k, xi, l, h.view_mut());
                 for i in 1..(k1 + 1) {
                     q[[it - 1, i - 1]] = h[i - 1];
-                    h[i - 1] = h[i - 1] * wi;
+                    h[i - 1] *= wi;
                 }
                 // rotate the new row of the observation matrix into triangle.
                 let mut j = l - k1;
@@ -277,17 +276,17 @@ pub(super) fn fpcurf(
                 let mut term = 0.0;
                 let mut l0 = l - k2;
                 for j in 1..(k1 + 1) {
-                    l0 = l0 + 1;
-                    term = term + c[l0 - 1] * q[[it - 1, j - 1]];
+                    l0 += 1;
+                    term += c[l0 - 1] * q[[it - 1, j - 1]];
                 }
                 term = (w[it - 1] * (term - y[it - 1])).powi(2);
-                fpart = fpart + term;
+                fpart += term;
                 if neww == 0 {
                     continue;
                 }
                 let store = term * 0.5;
                 fpint[i - 1] = fpart - store;
-                i = i + 1;
+                i += 1;
                 fpart = store;
                 neww = 0;
             }
@@ -368,7 +367,7 @@ pub(super) fn fpcurf(
             c[i - 1] = z[i - 1];
             g[[i - 1, k2 - 1]] = 0.0;
             for j in 1..(k1 + 1) {
-                g[[i - 1, j - 1]] = g[[i - 1, j - 1]];
+                g[[i - 1, j - 1]] = a[[i - 1, j - 1]];
             }
         }
         for it in 1..(n8 + 1) {
@@ -415,8 +414,8 @@ pub(super) fn fpcurf(
             let mut l0 = l - k2;
             let mut term = 0.0;
             for j in 1..(k1 + 1) {
-                l0 = l0 + 1;
-                term = term + c[l0 - 1] * q[[it - 1, j - 1]];
+                l0 += 1;
+                term += c[l0 - 1] * q[[it - 1, j - 1]];
             }
             *fp += (w[it - 1] * (term - y[it - 1])).powi(2);
         }
@@ -442,7 +441,7 @@ pub(super) fn fpcurf(
             //  our initial choice of p is too large.
             p3 = p2;
             f3 = f2;
-            p = p * con4;
+            p *= con4;
             if p <= p1 {
                 p = p1 * con9 + p2 * con1;
             }
@@ -458,7 +457,7 @@ pub(super) fn fpcurf(
             //  our initial choice of p is too small
             p1 = p2;
             f1 = f2;
-            p = p / con4;
+            p /= con4;
             if p3 < 0.0 {
                 continue;
             }

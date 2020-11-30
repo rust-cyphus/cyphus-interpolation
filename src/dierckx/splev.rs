@@ -1,6 +1,5 @@
 use ndarray::prelude::*;
 
-#[allow(dead_code)]
 pub(super) fn splev(
     t: ArrayView1<f64>,
     n: usize,
@@ -55,7 +54,7 @@ pub(super) fn splev(
                 break;
             }
             l1 = l;
-            l = l - 1;
+            l -= 1;
         }
 
         loop {
@@ -72,8 +71,8 @@ pub(super) fn splev(
         let mut sp = 0.0;
         let mut ll = l - k1;
         for j in 1..(k1 + 1) {
-            ll = ll + 1;
-            sp = sp + c[ll - 1] * h[j - 1];
+            ll += 1;
+            sp += c[ll - 1] * h[j - 1];
         }
         y[i - 1] = sp;
     }
@@ -128,7 +127,7 @@ pub(super) fn splev_point(
             break;
         }
         l1 = l;
-        l = l - 1;
+        l -= 1;
     }
 
     loop {
@@ -145,8 +144,8 @@ pub(super) fn splev_point(
     let mut sp = 0.0;
     let mut ll = l - k1;
     for j in 1..(k1 + 1) {
-        ll = ll + 1;
-        sp = sp + c[ll - 1] * h[j - 1];
+        ll += 1;
+        sp += c[ll - 1] * h[j - 1];
     }
     sp
 }

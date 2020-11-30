@@ -2,7 +2,6 @@ use ndarray::prelude::*;
 
 /// Calculates the derivatives of a spline of order k1 at the point
 /// t[l] <= x < t[l+1], using the stable recurrence scheme of de Boor
-#[allow(dead_code)]
 pub(super) fn fpader(
     t: ArrayView1<f64>,
     c: ArrayView1<f64>,

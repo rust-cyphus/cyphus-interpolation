@@ -1,6 +1,5 @@
 use ndarray::prelude::*;
 
-#[allow(dead_code)]
 pub(super) fn splder(
     t: ArrayView1<f64>,
     n: usize,
@@ -43,10 +42,10 @@ pub(super) fn splder(
         let mut nk2 = nk1;
         for _j in 1..(nu + 1) {
             let ak = kk;
-            nk2 = nk2 - 1;
+            nk2 -= 1;
             l1 = l;
             for i in 1..(nk2 + 1) {
-                l1 = l1 + 1;
+                l1 += 1;
                 let l2 = l1 + kk;
                 let fac = t[l2 - 1] - t[l1 - 1];
                 if fac <= 0.0 {
@@ -54,8 +53,8 @@ pub(super) fn splder(
                 }
                 wrk[i - 1] = ak as f64 * (wrk[i] - wrk[i - 1]) / fac;
             }
-            l = l + 1;
-            kk = kk - 1;
+            l += 1;
+            kk -= 1;
         }
         if kk == 0 {
             // if nu=k the derivative is a piecewise constant function
@@ -78,16 +77,16 @@ pub(super) fn splder(
                         break;
                     }
                     // l1 = l;
-                    l = l - 1;
-                    j = j - 1;
+                    l -= 1;
+                    j -= 1;
                 }
 
                 loop {
                     if arg < t[l] || l == nk1 {
                         break;
                     }
-                    l = l + 1;
-                    j = j + 1;
+                    l += 1;
+                    j += 1;
                 }
                 y[i - 1] = wrk[j - 1];
             }
@@ -119,7 +118,7 @@ pub(super) fn splder(
                 break;
             }
             l1 = l;
-            l = l - 1;
+            l -= 1;
         }
 
         loop {
@@ -137,8 +136,8 @@ pub(super) fn splder(
         let mut sp = 0.0;
         let mut ll = l - k1;
         for j in 1..(k2 + 1) {
-            ll = ll + 1;
-            sp = sp + wrk[ll - 1] * h[j - 1];
+            ll += 1;
+            sp += wrk[ll - 1] * h[j - 1];
         }
         y[i - 1] = sp;
     }

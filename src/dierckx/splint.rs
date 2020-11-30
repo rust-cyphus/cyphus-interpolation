@@ -1,6 +1,5 @@
 use ndarray::prelude::*;
 
-#[allow(dead_code)]
 pub(super) fn splint(
     t: ArrayView1<f64>,
     n: usize,

@@ -89,14 +89,14 @@ mod test {
     fn test_linear() {
         let (a, b, c, d) = (0.0, 0.0, 1.0, 1.0);
         let mut x = array![0.0, 0.0, 0.0, 0.0];
-        let n = fpcuro(a, b, c, d, x.view_mut());
+        let _n = fpcuro(a, b, c, d, x.view_mut());
         assert!((x[0] + 1.0).abs() < 1e-5);
     }
     #[test]
     fn test_quadratic() {
         let (a, b, c, d) = (0.0, 1.0, 0.0, -2f64);
         let mut x = array![0.0, 0.0, 0.0, 0.0];
-        let n = fpcuro(a, b, c, d, x.view_mut());
+        let _n = fpcuro(a, b, c, d, x.view_mut());
         assert!((x[0] - 2f64.sqrt()).abs() < 1e-5);
         assert!((x[1] + 2f64.sqrt()).abs() < 1e-5);
     }
@@ -104,7 +104,7 @@ mod test {
     fn test_cubic() {
         let (a, b, c, d) = (1.0f64, -6.0, 11.0, -6.0);
         let mut x = array![0.0, 0.0, 0.0, 0.0];
-        let n = fpcuro(a, b, c, d, x.view_mut());
+        let _n = fpcuro(a, b, c, d, x.view_mut());
         println!("{:?}", x);
         assert!((x[0] - 1.0).abs() < 1e-5);
         assert!((x[2] - 2.0).abs() < 1e-5);

@@ -15,7 +15,6 @@ use ndarray::prelude::*;
 ///    for at least one subset of data points, i.e. there must be a
 ///    subset of data points y(j) such that
 ///    t(j) < y(j) < t(j+k+1), j=1,2,...,n-k-1
-#[allow(dead_code)]
 pub(super) fn fpchec(
     x: ArrayView1<f64>,
     m: usize,
@@ -45,7 +44,7 @@ pub(super) fn fpchec(
         if t[j - 1] < t[j - 2] {
             return ier;
         }
-        j = j - 1;
+        j -= 1;
     }
     // check condition no 3:
     // t(k+1) < t(k+2) < ... < t(n-k)

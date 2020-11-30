@@ -22,12 +22,12 @@ pub(super) fn fpdisc(t: ArrayView1<f64>, n: usize, k2: usize, mut b: ArrayViewMu
             let mut jk = j;
             let mut prod = h[j - 1];
             for _i in 1..(k + 1) {
-                jk = jk + 1;
+                jk += 1;
                 prod = prod * h[jk - 1] * fac;
             }
             let lk = lp + k1;
             b[[lmk - 1, j - 1]] = (t[lk - 1] - t[lp - 1]) / prod;
-            lp = lp + 1;
+            lp += 1;
         }
     }
 }

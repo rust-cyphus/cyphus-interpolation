@@ -15,7 +15,6 @@ use ndarray::prelude::*;
 /// the fit s(x) is given in the b-spline representation (b-spline coef-
 /// ficients c(j),j=1,2,...,n-k-1) and can be evaluated by means of
 /// subroutine splev.
-#[allow(dead_code)]
 pub(super) fn curfit(
     iopt: &mut i32,
     m: usize,

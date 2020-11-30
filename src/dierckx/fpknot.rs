@@ -11,7 +11,6 @@ use ndarray::prelude::*;
 /// @param istart Indicates that the smallest data point at which the new knot
 ///              may be added is x(istart+1)
 ///
-#[allow(dead_code)]
 pub(super) fn fpknot(
     x: ArrayView1<f64>,
     mut t: ArrayViewMut1<f64>,
