@@ -6,10 +6,10 @@ use super::LinearInterp;
 impl LinearInterp {
     /// Create a new linear interpolator for a given set of `x` and `y` data.
     #[allow(dead_code)]
-    pub fn new(x: &Vec<f64>, y: &Vec<f64>) -> LinearInterp {
+    pub fn new(x: &[f64], y: &[f64]) -> LinearInterp {
         LinearInterp {
-            x: x.clone(),
-            y: y.clone(),
+            x: x.to_owned(),
+            y: y.to_owned(),
             acc: InterpAccel::new(),
         }
     }

@@ -6,7 +6,7 @@ pub(super) fn spalde(
     c: ArrayView1<f64>,
     k1: usize,
     x: f64,
-    mut d: ArrayViewMut1<f64>,
+    d: ArrayViewMut1<f64>,
     ier: &mut usize,
 ) {
     // before starting computations a data check is made. if the input data

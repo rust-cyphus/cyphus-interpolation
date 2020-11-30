@@ -25,10 +25,10 @@ pub(super) fn fpback(
         }
         let mut m = i;
         for l in 1..(i1 + 1) {
-            m = m + 1;
-            store = store - c[m - 1] * a[[i - 1, l + 1 - 1]];
+            m += 1;
+            store -= c[m - 1] * a[[i - 1, l + 1 - 1]];
         }
         c[i - 1] = store / a[[i - 1, 0]];
-        i = i - 1;
+        i -= 1;
     }
 }

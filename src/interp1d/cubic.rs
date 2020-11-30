@@ -5,7 +5,7 @@ use super::CubicSpline;
 
 impl CubicSpline {
     #[allow(dead_code)]
-    pub fn new(x: &Vec<f64>, y: &Vec<f64>) -> CubicSpline {
+    pub fn new(x: &[f64], y: &[f64]) -> CubicSpline {
         let npts = x.len();
         let max_idx = npts - 1;
         let sys_size = max_idx - 1;
@@ -34,8 +34,8 @@ impl CubicSpline {
             solve_tridiag(&diag, &offdiag, &gg, &mut c[1..], sys_size);
         }
         CubicSpline {
-            x: x.clone(),
-            y: y.clone(),
+            x: x.to_owned(),
+            y: y.to_owned(),
             c,
             acc: InterpAccel::new(),
         }
@@ -410,7 +410,7 @@ mod test {
             0.774989397332469,
         ];
 
-        let mut spline = CubicSpline::new(&data_x, &data_y);
+        let spline = CubicSpline::new(&data_x, &data_y);
 
         for (i, x) in test_x.iter().enumerate() {
             let y = spline.eval(*x);

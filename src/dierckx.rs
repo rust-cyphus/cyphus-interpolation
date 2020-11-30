@@ -1,3 +1,10 @@
+//! # `dierckx.rs`
+//! Port of the DIERCKX fortran library in the same style as `scipy`.
+//!
+//! ## Examples
+//! [`UnivariateSpline`]
+//!
+
 pub(super) mod curfit;
 pub(super) mod fpader;
 pub(super) mod fpback;
@@ -78,7 +85,7 @@ pub struct UnivariateSplineBuilder {
 }
 
 impl UnivariateSplineBuilder {
-    #[allow(dead_code)]
+    /// Create a `UnivariateSplineBuilder` with abscissa `x` and ordinates `y`.
     pub fn default(x: &Array1<f64>, y: &Array1<f64>) -> UnivariateSplineBuilder {
         UnivariateSplineBuilder {
             x: x.clone(),
@@ -90,35 +97,38 @@ impl UnivariateSplineBuilder {
             ext: None,
         }
     }
-    #[allow(dead_code)]
+    /// Set the weights of the abscissa.
     pub fn weights(mut self, w: Array1<f64>) -> UnivariateSplineBuilder {
-        self.w = Some(w.clone());
+        self.w = Some(w);
         self
     }
-    #[allow(dead_code)]
+    /// Set the boundary of the approximation interval.
     pub fn boundary(mut self, bbox: (f64, f64)) -> UnivariateSplineBuilder {
-        self.bbox = Some(bbox.clone());
+        self.bbox = Some(bbox);
         self
     }
-    #[allow(dead_code)]
+    /// Set the degree of the spline.
     pub fn degree(mut self, k: usize) -> UnivariateSplineBuilder {
         self.k = Some(k);
         self
     }
-    #[allow(dead_code)]
+    /// Set the smoothing factor of the spline.
     pub fn smoothing_factor(mut self, s: f64) -> UnivariateSplineBuilder {
         self.s = Some(s);
         self
     }
-    #[allow(dead_code)]
+    /// Specify the extrapolation type:
+    /// - if ext=0, return the extrapolated value,
+    /// - if ext=1, return 0,
+    /// - if ext=2, raise an error,
+    /// - if ext=3, return the boundary value.
     pub fn extrapolation(mut self, ext: usize) -> UnivariateSplineBuilder {
         self.ext = Some(ext);
         self
     }
-    #[allow(dead_code)]
     pub fn build(self) -> Result<UnivariateSpline, UnivariateSplineBuildErr> {
         let m = self.x.len();
-        let w = self.w.unwrap_or(Array1::<f64>::ones(m));
+        let w = self.w.unwrap_or_else(|| Array1::<f64>::ones(m));
         let bbox = self.bbox.unwrap_or((self.x[0], self.x[m - 1]));
         let mut k = self.k.unwrap_or(3);
         let s = self.s.unwrap_or(0.0);
@@ -212,7 +222,7 @@ impl UnivariateSpline {
     #[allow(dead_code)]
     pub fn eval(&self, x: f64) -> f64 {
         let mut ier = 0;
-        splev::splev_point(
+        let y = splev::splev_point(
             self.t.view(),
             self.n,
             self.c.view(),
@@ -220,7 +230,13 @@ impl UnivariateSpline {
             x,
             self.ext,
             &mut ier,
-        )
+        );
+        match ier {
+            0 => y,
+            1 => panic!("Extrapolation out of bounds."),
+            10 => panic!("Invalid data."),
+            _ => unreachable!(),
+        }
     }
     /// Evaluate the spline at a vector of points.
     #[allow(dead_code)]
@@ -239,7 +255,12 @@ impl UnivariateSpline {
             self.ext,
             &mut ier,
         );
-        y
+        match ier {
+            0 => y,
+            1 => panic!("Extrapolation out of bounds."),
+            10 => panic!("Invalid data."),
+            _ => unreachable!(),
+        }
     }
     #[allow(dead_code)]
     pub fn integrate(&self, a: f64, b: f64) -> f64 {
@@ -295,7 +316,7 @@ impl UnivariateSpline {
         let mut ier = 0;
         let zero = sproot::sproot(self.t.view(), self.n, self.c.view(), &mut ier);
         dbg!(ier);
-        return zero;
+        zero
     }
 }
 
@@ -306,14 +327,8 @@ mod test {
     fn test_eval() {
         let npts = 50;
         let interval = (0.0, std::f64::consts::PI);
-        let step = (interval.1 - interval.0) / (npts - 1) as f64;
-        let mut xs = Array1::<f64>::zeros(npts);
-        let mut ys = Array1::<f64>::zeros(npts);
-
-        for i in 0..npts {
-            xs[i] = interval.0 + step * i as f64;
-            ys[i] = xs[i].sin();
-        }
+        let xs = Array1::linspace(interval.0, interval.1, npts);
+        let ys = xs.mapv(f64::sin);
 
         let spline = UnivariateSplineBuilder::default(&xs, &ys).build().unwrap();
         let ys = spline.eval_array(&xs);
@@ -322,26 +337,78 @@ mod test {
         }
     }
     #[test]
-    fn test_integrate() {
+    fn test_extrapolation_0() {
         let npts = 50;
         let interval = (0.0, std::f64::consts::PI);
-        let step = (interval.1 - interval.0) / (npts - 1) as f64;
-        let mut xs = Array1::<f64>::zeros(npts);
-        let mut ys = Array1::<f64>::zeros(npts);
+        let xs = Array1::linspace(interval.0, interval.1, npts);
+        let ys = xs.mapv(f64::cos);
 
-        for i in 0..npts {
-            xs[i] = interval.0 + step * i as f64;
-            ys[i] = xs[i].sin();
-        }
+        let spline = UnivariateSplineBuilder::default(&xs, &ys)
+            .extrapolation(0)
+            .build()
+            .unwrap();
+        dbg!(spline.eval(-1.0));
+    }
+    #[test]
+    /// Test that when ext = 1 out-of-bounds evaluation returns zero
+    fn test_extrapolation_1() {
+        let npts = 50;
+        let interval = (0.0, std::f64::consts::PI);
+        let xs = Array1::linspace(interval.0, interval.1, npts);
+        let ys = xs.mapv(f64::cos);
+
+        let spline = UnivariateSplineBuilder::default(&xs, &ys)
+            .extrapolation(1)
+            .build()
+            .unwrap();
+        assert!(spline.eval(xs[0] - 1.0) == 0.0);
+        assert!(spline.eval(xs[npts - 1] + 1.0) == 0.0);
+    }
+    #[test]
+    #[should_panic]
+    /// Test that when ext = 2 out-of-bounds evaluation throws panics    
+    fn test_extrapolation_2() {
+        let npts = 50;
+        let interval = (0.0, std::f64::consts::PI);
+        let xs = Array1::linspace(interval.0, interval.1, npts);
+        let ys = xs.mapv(f64::cos);
+
+        let spline = UnivariateSplineBuilder::default(&xs, &ys)
+            .extrapolation(2)
+            .build()
+            .unwrap();
+        spline.eval(-1.0);
+    }
+    #[test]
+    /// Test that when ext = 3 out-of-bounds evaluation returns boundary
+    /// value
+    fn test_extrapolation_3() {
+        let npts = 50;
+        let interval = (0.0, std::f64::consts::PI);
+        let xs = Array1::linspace(interval.0, interval.1, npts);
+        let ys = xs.mapv(f64::cos);
+
+        let spline = UnivariateSplineBuilder::default(&xs, &ys)
+            .extrapolation(3)
+            .build()
+            .unwrap();
+        assert!((spline.eval(interval.0 - 1.0) - ys[0]).abs() < 1e-10);
+        assert!((spline.eval(interval.1 + 1.0) - ys[npts - 1]).abs() < 1e-10);
+    }
+    #[test]
+    fn test_integrate() {
+        let npts = 100;
+        let interval = (0.0, std::f64::consts::PI);
+        let xs = Array1::linspace(interval.0, interval.1, npts);
+        let ys = xs.mapv(f64::sin);
 
         let spline = UnivariateSplineBuilder::default(&xs, &ys).build().unwrap();
         let int = spline.integrate(1.0, 2.0);
-        dbg!("{}", int);
         assert!((int - 0.956449142415282).abs() < 1e-5);
     }
     #[test]
     fn test_derivatives() {
-        let npts = 50;
+        let npts = 100;
         let interval = (0.0, std::f64::consts::PI);
         let step = (interval.1 - interval.0) / (npts - 1) as f64;
         let mut xs = Array1::<f64>::zeros(npts);
@@ -356,11 +423,10 @@ mod test {
 
         let dys = spline.derivative_array(1, &xs);
         for (x, dy) in xs.iter().zip(dys.iter()) {
-            let dy0 = (*x).cos();
-            println!("{}, {}, {}, {}", *x, *dy, dy0, (*dy - dy0).abs());
-            //assert!((*dy - (*x).cos()).abs() < 1e-10);
+            // let dy0 = (*x).cos();
+            // println!("{}, {}, {}, {:e}", *x, *dy, dy0, (*dy - dy0).abs());
+            assert!((*dy - (*x).cos()).abs() < 2e-7);
         }
-        assert!(false);
     }
     #[test]
     fn test_roots() {

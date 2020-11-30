@@ -1,7 +1,7 @@
 use super::acc::InterpAccel;
 
 #[allow(dead_code)]
-pub(super) fn bsearch(xarr: &Vec<f64>, x: f64, idx_low: usize, idx_high: usize) -> usize {
+pub(super) fn bsearch(xarr: &[f64], x: f64, idx_low: usize, idx_high: usize) -> usize {
     let mut ilow = idx_low;
     let mut ihigh = idx_high;
 
@@ -17,7 +17,7 @@ pub(super) fn bsearch(xarr: &Vec<f64>, x: f64, idx_low: usize, idx_high: usize) 
 }
 
 #[allow(dead_code)]
-pub(super) fn accel_find(xarr: &Vec<f64>, x: f64, acc: &mut InterpAccel) -> usize {
+pub(super) fn accel_find(xarr: &[f64], x: f64, acc: &mut InterpAccel) -> usize {
     let xidx = acc.cache;
 
     if x < xarr[xidx] {

@@ -46,7 +46,7 @@ pub(super) fn curfit(
     // before starting computations a data check is made. if the input data
     // are invalid, control is immediately repassed to the calling program.
     *ier = 10;
-    if *k <= 0 || *k > 5 {
+    if *k == 0 || *k > 5 {
         return;
     }
     let k1 = *k + 1;

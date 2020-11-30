@@ -61,7 +61,7 @@ fn apply_newton_iter(a: f64, b: f64, c: f64, d: f64, mut x: ArrayViewMut1<f64>, 
 }
 
 /// Find the real zeros of a cubic polynomial p(x) = ax^3 + bx^2 + cx + d
-pub(super) fn fpcuro(a: f64, b: f64, c: f64, d: f64, mut x: ArrayViewMut1<f64>) -> usize {
+pub(super) fn fpcuro(a: f64, b: f64, c: f64, d: f64, x: ArrayViewMut1<f64>) -> usize {
     let a1 = a.abs();
     let b1 = b.abs();
     let c1 = c.abs();

@@ -29,7 +29,7 @@ pub(super) fn fpader(
                 let li = i + lk;
                 let lj = li + kj;
                 h[i - 1] = (h[i - 1] - h[i - 1 - 1]) / (t[lj - 1] - t[li - 1]);
-                i = i - 1;
+                i -= 1;
             }
         }
         for i in j..(k1 + 1) {
@@ -44,13 +44,13 @@ pub(super) fn fpader(
                     let lj = li + ki;
                     d[i - 1] = ((x - t[li - 1]) * d[i - 1] + (t[lj - 1] - x) * d[i - 1 - 1])
                         / (t[lj - 1] - t[li - 1]);
-                    i = i - 1;
+                    i -= 1;
                 }
             }
         }
         d[j - 1] = d[k1 - 1] * fac;
         let ak = k1 - j;
-        fac = fac * ak as f64;
-        kj = kj - 1;
+        fac *= ak as f64;
+        kj -= 1;
     }
 }

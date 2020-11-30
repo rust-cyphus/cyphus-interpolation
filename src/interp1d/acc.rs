@@ -4,6 +4,12 @@ pub struct InterpAccel {
     pub(crate) miss_count: usize,
 }
 
+impl Default for InterpAccel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl InterpAccel {
     pub fn new() -> InterpAccel {
         InterpAccel {
